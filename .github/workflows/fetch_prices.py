@@ -1,0 +1,36 @@
+import json
+import sys
+import urllib.request
+
+CATS = {
+    "csirkemell": 18, "tojás": 14, "hagyma": 40, "paradicsom": 34,
+    "tészta": 50, "burgonya": 41, "rizs": 95, "tejföl": 5,
+    "sajt": 10, "kolbász": 88,
+}
+
+API = "https://arfigyelo.gvh.hu/api/products-by-category/"
+
+def fetch_cheapest(category_id):
+    url = API + str(category_id)
+    req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+    with urllib.request.urlopen(req, timeout=15) as r:
+        data = json.load(r)
+    best = None
+    for p in data.get("products", []):
+        price = p.get("minUnitPrice")
+        if not price:
+            continue
+        if best is None or price < best["p"]:
+            chain = (p.get("pricesOfChainStores") or [{}])[0].get("name", "")
+            best = {"p": price, "chain": chain}
+    return best
+
+result = {}
+for name, cat_id in CATS.items():
+    try:
+        result[name] = fetch_cheapest(cat_id)
+        print(f"{name}: ok", file=sys.stderr)
+    except Exception as e:
+        print(f"{name}: failed ({e})", file=sys.stderr)
+
+print(json.dumps(result, ensure_ascii=False))
