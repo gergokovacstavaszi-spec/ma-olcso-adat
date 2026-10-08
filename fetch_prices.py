@@ -1,6 +1,7 @@
 import json
 import sys
 import urllib.request
+from datetime import datetime, timezone
 
 CATS = {
     "csirkemell": 18, "tojás": 14, "hagyma": 40, "paradicsom": 34,
@@ -33,4 +34,8 @@ for name, cat_id in CATS.items():
     except Exception as e:
         print(f"{name}: failed ({e})", file=sys.stderr)
 
-print(json.dumps(result, ensure_ascii=False))
+output = {
+    "meta": {"updated": datetime.now(timezone.utc).isoformat()},
+    "ingredients": result,
+}
+print(json.dumps(output, ensure_ascii=False))
