@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="hu">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Ma Olcsó — Mit főzzek ma?</title>
+<meta name="description" content="Receptek rangsorolva a hozzávalók valós, napi árai alapján. Főzz olcsón, a GVH Árfigyelő adataival.">
+<meta property="og:title" content="Ma Olcsó — Mit főzzek ma olcsón?">
+<meta property="og:description" content="Magyar receptek a legolcsóbbtól, napi friss alapanyagárakkal.">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="hu_HU">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --forest:#1F3A2B; --forest-light:#345240; --cream:#FBF6EC; --paper:#FFFDF8;
+  --mustard:#D99B2B; --clay:#B4553B; --sage:#7BA384;
+  color-scheme:light; --ink:#231F1A; --muted:rgba(35,31,26,.6); --line:rgba(35,31,26,.1);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+button,select,input,textarea{color:#231F1A;font-family:inherit}
+.pantry button{color:#231F1A}
+.pantry button.have{color:#fff}
+html,body{height:100%}
+body{
+  background:var(--cream); color:var(--ink); font-family:'DM Sans',sans-serif; line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+  padding-top:env(safe-area-inset-top,0); padding-bottom:env(safe-area-inset-bottom,0);
+}
+.serif{font-family:'DM Serif Display',serif;font-weight:400}
+.wrap{max-width:860px;margin:0 auto;padding:0 20px}
+
+header{
+  background:linear-gradient(160deg,var(--forest) 0%,var(--forest-light) 100%);
+  color:var(--cream); padding:40px 0 30px; position:relative; overflow:hidden;
+}
+header::after{
+  content:""; position:absolute; right:-60px; top:-60px; width:220px; height:220px;
+  border-radius:50%; background:radial-gradient(circle,rgba(217,155,43,.18),transparent 70%);
+}
+header h1{font-size:clamp(1.9rem,5vw,2.6rem); font-family:'DM Serif Display',serif; position:relative}
+header p{color:rgba(251,246,236,.78); font-size:.97rem; margin-top:6px; max-width:48ch; position:relative}
+.status{
+  margin-top:16px; display:inline-flex; gap:8px; align-items:center; font-size:.8rem;
+  background:rgba(251,246,236,.1); border:1px solid rgba(251,246,236,.22);
+  padding:7px 13px; border-radius:20px; position:relative;
+}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--mustard);flex-shrink:0}
+.dot.live{background:var(--sage)}
+
+main{padding:30px 0 56px}
+.title{font-size:1.02rem;color:var(--forest);margin:0 0 14px;font-weight:600;font-family:'DM Serif Display',serif}
+
+details.pastebox{
+  background:var(--paper); border:1px solid var(--line); border-radius:12px;
+  padding:16px 18px; margin-bottom:28px;
+}
+.pastebox summary{cursor:pointer;font-size:.88rem;color:var(--forest);font-weight:600;list-style:none}
+.pastebox summary::-webkit-details-marker{display:none}
+.pastebox summary::before{content:"▸ ";color:var(--mustard)}
+.pastebox[open] summary::before{content:"▾ "}
+.pastebox textarea{
+  width:100%;margin-top:10px;font-family:monospace;font-size:.8rem;min-height:90px;
+  border:1px solid var(--line);border-radius:8px;padding:10px;background:var(--cream);
+}
+.pastebox button{
+  margin-top:8px;background:var(--forest);color:#fff;border:none;border-radius:8px;
+  padding:9px 18px;font-size:.85rem;cursor:pointer;font-weight:500;
+}
+.pastebox button:hover{background:var(--forest-light)}
+.pastebox .msg{font-size:.78rem;color:var(--muted);margin-top:6px}
+
+.chips{display:flex;gap:10px;overflow-x:auto;padding:2px 2px 14px;margin-bottom:26px;-webkit-overflow-scrolling:touch}
+.chip{
+  flex-shrink:0;background:var(--paper);border:1px solid var(--line);border-radius:9px;
+  padding:9px 14px;font-size:.84rem;white-space:nowrap;
+}
+.chip b{color:var(--clay)}
+
+.card{
+  background:var(--paper);border:1px solid var(--line);border-radius:14px;
+  padding:20px 22px;margin-bottom:14px;cursor:pointer;
+  transition:box-shadow .15s ease, border-color .15s ease;
+}
+.card:hover{box-shadow:0 4px 18px rgba(35,31,26,.07);border-color:rgba(35,31,26,.18)}
+.card-top{display:flex;justify-content:space-between;gap:18px;flex-wrap:wrap;align-items:flex-start}
+.name{font-family:'DM Serif Display',serif;font-size:1.28rem;margin-bottom:9px}
+.ings{display:flex;flex-wrap:wrap;gap:6px;font-size:.85rem;color:var(--muted)}
+.ing{padding:3px 10px;border-radius:6px;background:rgba(35,31,26,.045)}
+.ing.sale{background:rgba(217,155,43,.18);color:#8a5f10;font-weight:600}
+.score{text-align:right;flex-shrink:0}
+.big{font-family:'DM Serif Display',serif;font-size:1.7rem;color:var(--forest);line-height:1}
+.lbl{font-size:.72rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em;margin-top:4px}
+
+.steps{display:none;margin-top:16px;padding-top:16px;border-top:1px solid var(--line)}
+.steps.open{display:block;animation:fade .2s ease}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+.meta{display:flex;gap:16px;flex-wrap:wrap;font-size:.82rem;color:var(--muted);margin-bottom:14px}
+.meta b{color:var(--forest)}
+.steps ul.qty{list-style:none;margin-bottom:16px;border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.steps ul.qty li{display:flex;justify-content:space-between;padding:7px 12px;font-size:.85rem;background:var(--cream)}
+.steps ul.qty li:nth-child(even){background:rgba(35,31,26,.02)}
+.steps ol{padding-left:20px;font-size:.92rem}
+.steps li{margin-bottom:7px}
+.note{background:rgba(217,155,43,.1);border-left:3px solid var(--mustard);border-radius:4px;padding:9px 12px;font-size:.84rem;margin-top:12px}
+.note b{color:var(--clay)}
+
+footer{text-align:center;font-size:.8rem;color:var(--muted);padding:0 20px 40px}
+.toolbar{display:flex;gap:10px;margin-bottom:18px;flex-wrap:wrap}
+.toolbar input{color:#231F1A;flex:1;min-width:160px;border:1px solid var(--line);border-radius:8px;padding:9px 12px;font-size:.9rem;background:var(--paper)}
+.toolbar button{border:1px solid var(--line);background:var(--paper);border-radius:8px;padding:9px 14px;font-size:.85rem;cursor:pointer}
+.toolbar button:hover{background:var(--cream)}
+.updated{font-size:.78rem;color:var(--muted);margin:-8px 0 18px}
+.logbox{background:#1b1b1b;color:#9fe39f;font-family:monospace;font-size:.76rem;border-radius:8px;padding:10px 12px;max-height:160px;overflow-y:auto;margin-top:8px}
+.logbox div{white-space:pre-wrap;margin-bottom:2px}
+.logbox div.err{color:#ff9a8d}
+
+.addbtn{margin-top:12px;background:var(--forest);color:#fff;border:none;border-radius:8px;padding:8px 14px;font-size:.84rem;cursor:pointer;font-weight:500}
+.addbtn:hover{background:var(--forest-light)}
+.cartbox{background:var(--paper);border:1px solid var(--line);border-radius:14px;padding:18px 20px;margin-bottom:24px}
+.cartbox h3{font-family:'DM Serif Display',serif;font-weight:400;font-size:1.15rem;color:var(--forest);margin-bottom:10px}
+.cartrow{display:flex;justify-content:space-between;gap:10px;font-size:.88rem;padding:6px 0;border-bottom:1px solid var(--line)}
+.cartrec{display:flex;justify-content:space-between;gap:10px;font-size:.82rem;color:var(--muted);padding:3px 0}
+.cartrec button,.cartclear{background:none;border:none;color:var(--clay);cursor:pointer;font-size:.8rem}
+.carttotal{display:flex;justify-content:space-between;font-weight:700;color:var(--forest);margin-top:10px;font-size:1rem}
+.cartnote{font-size:.76rem;color:var(--muted);margin-top:8px}
+.toast{position:fixed;left:50%;bottom:calc(76px + env(safe-area-inset-bottom,0));transform:translateX(-50%) translateY(10px);background:#231F1A;color:#fff;border-radius:22px;padding:10px 18px;font-size:.86rem;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:60;max-width:90vw;text-align:center}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.fab{position:fixed;right:16px;bottom:calc(16px + env(safe-area-inset-bottom,0));background:var(--clay);color:#fff;border:none;border-radius:26px;padding:12px 18px;font-size:.9rem;font-weight:600;cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,.25);display:none;z-index:50}
+.addbtn.done{background:var(--sage)}
+.opts{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px}
+.opts select,.opts button{color:#231F1A;border:1px solid var(--line);background:var(--paper);border-radius:8px;padding:8px 10px;font-size:.84rem;font-family:inherit;cursor:pointer}
+.opts input{color:#231F1A;border:1px solid var(--line);background:var(--paper);border-radius:8px;padding:8px 10px;font-size:.84rem;font-family:inherit;width:120px}
+.plan{margin-top:10px}
+.plan .row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.plan select,.plan input{color:#231F1A;border:1px solid var(--line);background:var(--cream);border-radius:8px;padding:8px 10px;font-size:.84rem;font-family:inherit}
+.plan .go{background:var(--forest);color:#fff;border:none;border-radius:8px;padding:9px 16px;font-size:.85rem;cursor:pointer;font-weight:500}
+.plan .res{margin-top:12px}
+.plan .item{display:flex;justify-content:space-between;gap:10px;font-size:.88rem;padding:7px 0;border-bottom:1px solid var(--line)}
+.plan .sum{display:flex;justify-content:space-between;font-weight:700;color:var(--forest);margin-top:10px}
+.plan .hint{font-size:.78rem;color:var(--muted);margin-top:6px}
+.up{color:#b4553b;font-size:.72rem;margin-left:3px}.down{color:#2d7a4a;font-size:.72rem;margin-left:3px}
+.sharebtn{margin-top:12px;margin-left:8px;background:var(--paper);color:#231F1A;border:1px solid var(--line);border-radius:8px;padding:8px 14px;font-size:.84rem;cursor:pointer}
+.badge{display:inline-block;font-size:.7rem;font-weight:600;background:rgba(123,163,132,.25);color:#2d5a3a;border-radius:10px;padding:2px 8px;margin-left:6px;vertical-align:middle;font-family:'DM Sans',sans-serif}
+.today{background:linear-gradient(135deg,rgba(217,155,43,.16),rgba(217,155,43,.06));border:1px solid rgba(217,155,43,.35);border-radius:14px;padding:14px 18px;margin-bottom:18px;font-size:.92rem;cursor:pointer}
+.today b{color:var(--clay)}
+.opts select option{color:#231F1A;background:#fff}
+.opts button.on{background:var(--forest);color:#fff;border-color:var(--forest)}
+.pantry{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.pantry button{color:#231F1A;margin-top:0;font-weight:400;border:1px solid var(--line);background:var(--cream);border-radius:18px;padding:6px 13px;font-size:.84rem;cursor:pointer;font-family:inherit}
+.pantry button.have{background:var(--sage);color:#fff;border-color:var(--sage)}
+.pantry button:hover{background:#efe7d6}
+.pantry button.have:hover{background:var(--sage)}
+.fav{background:none;border:none;font-size:1.25rem;cursor:pointer;color:var(--clay);padding:0 4px;line-height:1}
+.ing.have{text-decoration:line-through;opacity:.55}
+.copybtn{margin-top:10px;background:var(--paper);border:1px solid var(--line);border-radius:8px;padding:7px 12px;font-size:.82rem;cursor:pointer}
+.empty{text-align:center;color:var(--muted);padding:30px 10px;font-size:.92rem}
+@media(max-width:520px){
+  .card-top{flex-direction:column;gap:10px}
+  .score{text-align:left}
+  header{padding:30px 0 22px}
+}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style>
+</head>
+<body>
+<header><div class="wrap">
+<h1>Mit főzzek ma olcsón?</h1>
+<p>Receptek rangsorolva a hozzávalók mai legolcsóbb ára alapján, a magyar üzletláncok adatai szerint.</p>
+<div class="status"><span class="dot" id="dot"></span><span id="statusText">Árak betöltése…</span></div>
+</div></header>
+
+<main class="wrap">
+<details class="pastebox" style="margin-bottom:16px">
+<summary>Miről szól ez az oldal?</summary>
+<div style="margin-top:10px;font-size:.88rem;color:var(--ink);line-height:1.6">
+Ez egy kis személyes projekt: a recepteket a hozzávalók mai legolcsóbb ára alapján rangsorolja, a GVH Árfigyelő nyilvános adatai szerint. Az árak becsültek, nem egy konkrét üzlet tényleges bevásárlólistája. Ha a böngésződ nem tud élő adatot lekérni, minta árakat látsz — ez jól jelzi, hogyan rangsorolódnának a receptek, csak nem a mai valós árakkal.
+</div>
+</details>
+
+<div class="title">Legolcsóbb ár alapanyagonként (Ft/kg, tej és olaj: Ft/liter)</div>
+<div class="chips" id="chips"></div>
+<div class="updated" id="updatedLine"></div>
+
+<div class="toolbar">
+  <input type="text" id="search" placeholder="Keresés recept vagy hozzávaló szerint…" oninput="applyFilter()">
+  <button onclick="init()">↻ Frissítés</button>
+</div>
+
+<div class="cartbox" id="cartbox" style="display:none"><h3>Bevásárlólista</h3><div id="cartContent"></div></div>
+<div class="today" id="today" style="display:none" onclick="document.getElementById('list').scrollIntoView({behavior:'smooth'})"></div>
+<details class="pastebox" id="planBox" style="margin-bottom:14px">
+<summary>Heti menütervező</summary>
+<div class="plan">
+ <div class="row">
+  <label style="font-size:.84rem">Napok:</label>
+  <select id="planDays"><option>3</option><option selected>5</option><option>7</option></select>
+  <label style="font-size:.84rem">Keret (Ft, nem kötelező):</label>
+  <input type="number" id="planBudget" min="0" step="500" placeholder="pl. 5000" style="width:120px">
+  <label style="font-size:.84rem"><input type="checkbox" id="planVeg"> hús nélkül</label>
+  <button class="go" onclick="makePlan()">Tervet kérek</button>
+ </div>
+ <div class="res" id="planRes"></div>
+</div>
+</details>
+<details class="pastebox" id="pantryBox" style="margin-bottom:14px">
+<summary>Mi van otthon? <span id="pantryCount" style="font-weight:400;color:var(--muted)"></span></summary>
+<div style="font-size:.82rem;color:var(--muted);margin-top:8px">Jelöld be, amit már birtokolsz — a költség csak a hiányzó hozzávalókat számolja.</div>
+<div class="pantry" id="pantry"></div>
+</details>
+<div class="opts">
+  <select id="sortSel" onchange="setOpt()"><option value="cost">Rendezés: legolcsóbb</option><option value="easy">Rendezés: legkönnyebb</option><option value="few">Rendezés: legkevesebb hozzávaló</option></select>
+  <select id="diffSel" onchange="setOpt()"><option value="">Minden nehézség</option><option>Nagyon könnyű</option><option>Könnyű</option><option>Közepes</option></select>
+  <select id="multSel" onchange="setOpt()"><option value="1">Adag: ×1</option><option value="2">Adag: ×2</option><option value="3">Adag: ×3</option><option value="4">Adag: ×4</option></select>
+  <select id="dietSel" onchange="setOpt()"><option value="">Étrend: minden</option><option value="veg">Hús nélkül</option></select>
+  <input type="number" id="maxCost" min="0" step="100" placeholder="Max Ft" oninput="applyFilter()">
+  <button onclick="surprise()">🎲 Meglepetés</button>
+  <button id="favOnly" onclick="toggleFavOnly()">♥ Kedvencek</button>
+</div>
+<div class="title" id="listTitle">Receptek, a legolcsóbbtól</div>
+<div id="list"></div>
+
+</main>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<button class="fab" id="fab" onclick="document.getElementById('cartbox').scrollIntoView({behavior:'smooth'})"></button>
+<footer>Adatforrás: Árfigyelő (GVH). Az ár a recepthez ténylegesen szükséges mennyiségek alapján becsült, a legolcsóbb láncok árain — nem a teljes termékek árának összege.</footer>
+
+<script>
+const API = "https://arfigyelo.gvh.hu/api/products-by-category/";
+const CATS = {csirkemell:18, tojás:14, hagyma:40, paradicsom:34, tészta:50, burgonya:41, rizs:95, tejföl:5, sajt:10, kolbász:88, fokhagyma:39, sárgarépa:36, paprika:35, uborka:38, káposzta:43, brokkoli:97, tej:3, étolaj:51, liszt:52, vaj:12, "darált sertés":85, "darált marha":86, lencse:96, kenyér:46, kukorica:56, zöldborsó:59, szalonna:89, joghurt:7, túró:9};
+const SAMPLE = {csirkemell:{p:2490,chain:"Minta"},tojás:{p:1800,chain:"Minta"},hagyma:{p:450,chain:"Minta"},paradicsom:{p:1100,chain:"Minta"},tészta:{p:700,chain:"Minta"},burgonya:{p:400,chain:"Minta"},rizs:{p:900,chain:"Minta"},tejföl:{p:1500,chain:"Minta"},sajt:{p:3200,chain:"Minta"},kolbász:{p:4200,chain:"Minta"},fokhagyma:{p:2500},sárgarépa:{p:450},paprika:{p:1500},uborka:{p:800},káposzta:{p:350},brokkoli:{p:1300},tej:{p:400},étolaj:{p:800},liszt:{p:300},vaj:{p:4500},"darált sertés":{p:2800},"darált marha":{p:3800},lencse:{p:1500},kenyér:{p:700},kukorica:{p:1400},zöldborsó:{p:900},szalonna:{p:3200},joghurt:{p:700},túró:{p:1500}};
+
+const RECIPES = [
+ {n:"Csirkés rizs egy lábasban",srv:"2 főre",diff:"Könnyű",time:"10 perc előkészítés · 25 perc főzés",
+  tip:"A paradicsom helyett bármilyen zöldség jó, amit otthon találsz — csak puhuljon bele a rizsbe.",
+  keep:"3 napig áll el hűtőben, egy kis vízzel jól felmelegíthető.",
+  i:["csirkemell","rizs","hagyma","paradicsom"],
+  q:{csirkemell:"300 g",rizs:"200 g",hagyma:"1 közepes",paradicsom:"2 közepes"},
+  qKg:{csirkemell:0.3,rizs:0.2,hagyma:0.12,paradicsom:0.24},
+  s:["Kockázd fel a hagymát és a csirkemellet.","Dinszteld meg a hagymát, add hozzá a csirkét, pirítsd körbe.","Keverd hozzá a rizst, add hozzá a felkockázott paradicsomot és annyi vizet, hogy ellepje.","Fedő alatt pároljuk 18-20 percig, amíg a rizs megpuhul."]},
+ {n:"Tükörtojás kolbásszal",srv:"1-2 főre",diff:"Nagyon könnyű",time:"5 perc előkészítés · 10 perc főzés",
+  tip:"Nem csak reggelire jó — kenyérrel kiegészítve bőséges vacsora is lehet.",
+  keep:"Frissen a legjobb, a tojás nem melegíthető újra jól.",
+  i:["tojás","kolbász","hagyma"],
+  q:{tojás:"3 db",kolbász:"150 g",hagyma:"fél közepes"},
+  qKg:{tojás:0.18,kolbász:0.15,hagyma:0.06},
+  s:["Szeleteld fel a kolbászt és a hagymát.","Süsd együtt a kolbászt és a hagymát, amíg a hagyma megpuhul.","Told félre, üsd rá a tojásokat a serpenyő másik felébe.","Süsd a tojást ízlés szerint, tálald együtt."]},
+ {n:"Tejfölös-kolbászos tészta",srv:"2 főre",diff:"Könnyű",time:"10 perc előkészítés · 15 perc főzés",
+  tip:"Tegyél félre egy kevés tésztafőzővizet — ha besűrűsödne a szósz, azzal hígítható.",
+  keep:"2 napig áll el, melegítéskor egy kis tejjel lazítsd fel.",
+  i:["tészta","kolbász","tejföl","sajt"],
+  q:{tészta:"200 g",kolbász:"150 g",tejföl:"150 g",sajt:"50 g"},
+  qKg:{tészta:0.2,kolbász:0.15,tejföl:0.15,sajt:0.05},
+  s:["Főzd meg a tésztát.","Szeleteld fel a kolbászt, süsd pirosra.","Keverd bele a tejfölt, melegítsd át (ne forrald fel erősen).","Forgasd össze a leszűrt tésztával, szórd meg reszelt sajttal."]},
+ {n:"Burgonyás-hagymás serpenyős",srv:"2 főre",diff:"Könnyű",time:"10 perc előkészítés · 20 perc főzés",
+  tip:"Ne hagyd ki az előfőzést — ettől lesz ropogós a krumpli, nem nyers ízű.",
+  keep:"Frissen a legjobb, a krumpli megpuhul melegítéskor.",
+  i:["burgonya","hagyma","tojás"],
+  q:{burgonya:"400 g",hagyma:"1 közepes",tojás:"2 db"},
+  qKg:{burgonya:0.4,hagyma:0.12,tojás:0.12},
+  s:["Kockázd apróra a krumplit, főzd elő 5 percig, szűrd le.","Süsd aranyszínűre a hagymát, add hozzá a krumplit, süsd ropogósra.","Csinálj egy kis helyet középen, üsd bele a tojást, fedő alatt süsd készre."]},
+ {n:"Paradicsomos tészta",srv:"2 főre",diff:"Nagyon könnyű",time:"5 perc előkészítés · 20 perc főzés",
+  tip:"Ha túl híg a szósz, hagyd tovább főni — a párolgástól besűrűsödik.",
+  keep:"3 napig áll el, az egyik legjobban melegíthető fogás a listán.",
+  i:["tészta","paradicsom","hagyma","sajt"],
+  q:{tészta:"200 g",paradicsom:"3 közepes",hagyma:"1 közepes",sajt:"40 g"},
+  qKg:{tészta:0.2,paradicsom:0.36,hagyma:0.12,sajt:0.04},
+  s:["Főzd meg a tésztát.","Dinszteld meg a hagymát, add hozzá a felkockázott paradicsomot, főzd szósszá.","Forgasd össze a tésztával, szórd meg reszelt sajttal."]},
+ {n:"Csirkepaprikás",srv:"2-3 főre",diff:"Közepes",time:"10 perc előkészítés · 25 perc főzés",
+  tip:"A tejfölt vedd le a tűzről, mielőtt hozzáadod, így nem fog összemenni.",
+  keep:"3 napig áll el, másnapra még finomabb.",
+  i:["csirkemell","hagyma","tejföl","paradicsom"],
+  q:{csirkemell:"400 g",hagyma:"1 nagy",tejföl:"150 g",paradicsom:"1 közepes"},
+  qKg:{csirkemell:0.4,hagyma:0.18,tejföl:0.15,paradicsom:0.12},
+  s:["Dinszteld meg a hagymát, ha van paprikád, add hozzá.","Add hozzá a felkockázott csirkét, pirítsd meg, majd add hozzá a paradicsomot és egy kis vizet.","Főzd 15 percig, amíg a csirke átsül.","Tűzről levéve keverd bele a tejfölt."]},
+ {n:"Sajtos-tejfölös burgonyás sütés",srv:"2-3 főre",diff:"Közepes",time:"15 perc előkészítés · 30 perc sütés",
+  tip:"Szeleteld olyan vékonyra a krumplit, amennyire csak lehet — ettől lesz puha, nem rágós a közepe.",
+  keep:"3 napig áll el, sütőben jól melegíthető.",
+  i:["burgonya","sajt","tejföl","hagyma"],
+  q:{burgonya:"500 g",sajt:"80 g",tejföl:"200 g",hagyma:"1 közepes"},
+  qKg:{burgonya:0.5,sajt:0.08,tejföl:0.2,hagyma:0.12},
+  s:["Szeleteld vékonyra a krumplit, főzd elő 5 percig.","Rétegezd a krumplit és a felszeletelt hagymát egy tálban.","Keverd ki a tejfölt egy kis vízzel, öntsd rá.","Szórd meg reszelt sajttal, süsd 200°C-on 30 percig, amíg megpirul."]},
+ {n:"Egyszerű sült rizs",srv:"2 főre",diff:"Nagyon könnyű",time:"5 perc előkészítés · 10 perc főzés",
+  tip:"A frissen főtt rizs összeragad — ha van tegnapi rizsed a hűtőben, azt használd.",
+  keep:"2 napig áll el — alaposan melegítsd át, hidegen ne edd.",
+  i:["rizs","tojás","hagyma"],
+  q:{rizs:"200 g",tojás:"2 db",hagyma:"fél közepes"},
+  qKg:{rizs:0.2,tojás:0.12,hagyma:0.06},
+  s:["Főzd meg a rizst, hagyd kihűlni (a tegnapi a legjobb).","Dinszteld meg a hagymát, told félre.","Ugyanabban a serpenyőben kavard rántottává a tojást.","Add hozzá a rizst, süsd át, amíg átmelegszik."]},
+ {n:"Rakott burgonya csirkével",srv:"3-4 főre",diff:"Közepes",time:"20 perc előkészítés · 35 perc sütés",
+  tip:"A csirkét süsd meg előre, hogy biztosan átsüljön a rétegek között is.",
+  keep:"3-4 napig áll el, sütőben vagy mikróban is jól melegíthető.",
+  i:["burgonya","csirkemell","tojás","tejföl","sajt"],
+  q:{burgonya:"600 g",csirkemell:"300 g",tojás:"3 db",tejföl:"200 g",sajt:"60 g"},
+  qKg:{burgonya:0.6,csirkemell:0.3,tojás:0.18,tejföl:0.2,sajt:0.06},
+  s:["Főzd meg a burgonyát héjastul, hűtsd le, szeleteld fel.","Főzd kemény tojásra a tojásokat, szeleteld fel.","Süsd meg apróra vágva a csirkemellet.","Rétegezd egy tálban a burgonyát, tojást, csirkét, tejfölt.","Szórd meg reszelt sajttal, süsd 200°C-on 30-35 percig."]},
+ {n:"Egyszerű zöldséges rizottó",srv:"2 főre",diff:"Közepes",time:"10 perc előkészítés · 25 perc főzés",
+  tip:"Add fokozatosan a vizet a rizshez, kevergetve — ettől lesz krémes, nem kásás.",
+  keep:"2 napig áll el, melegítéskor adj hozzá egy kis vizet.",
+  i:["rizs","hagyma","paradicsom","sajt"],
+  q:{rizs:"200 g",hagyma:"1 közepes",paradicsom:"2 közepes",sajt:"50 g"},
+  qKg:{rizs:0.2,hagyma:0.12,paradicsom:0.24,sajt:0.05},
+  s:["Dinszteld üvegesre a hagymát.","Add hozzá a rizst, pirítsd meg 1-2 percig.","Add hozzá a felkockázott paradicsomot, majd merőkanalanként a vizet, folyamatosan kevergetve.","Amikor a rizs megpuhult, keverd bele a reszelt sajtot."]},
+ {n:"Tojásos tészta kolbásszal",srv:"2 főre",diff:"Könnyű",time:"5 perc előkészítés · 15 perc főzés",
+  tip:"A tojást a tűzről levéve keverd a tésztához, hogy krémes maradjon, ne rántotta legyen belőle.",
+  keep:"Legjobb frissen, a tojásos szósz újramelegítve könnyen megköphet.",
+  i:["tészta","tojás","kolbász","sajt"],
+  q:{tészta:"200 g",tojás:"2 db",kolbász:"100 g",sajt:"50 g"},
+  qKg:{tészta:0.2,tojás:0.12,kolbász:0.1,sajt:0.05},
+  s:["Főzd meg a tésztát.","Szeleteld fel és süsd ropogósra a kolbászt.","Verd fel a tojást a reszelt sajt felével.","Vedd le a tűzről a tésztát, forgasd bele a kolbászt, majd a tojásos keveréket, gyors kevergetéssel."]},
+ {n:"Csirkés burgonyapüré tál",srv:"2-3 főre",diff:"Könnyű",time:"10 perc előkészítés · 25 perc főzés",
+  tip:"A püréhez használt tejföl krémesebbé teszi, mint a sima tej.",
+  keep:"2-3 napig áll el, a püré melegítéskor egy kis vízzel lazítható.",
+  i:["burgonya","csirkemell","tejföl","hagyma"],
+  q:{burgonya:"500 g",csirkemell:"300 g",tejföl:"100 g",hagyma:"1 közepes"},
+  qKg:{burgonya:0.5,csirkemell:0.3,tejföl:0.1,hagyma:0.12},
+  s:["Főzd puhára a meghámozott burgonyát, törd pürévé a tejföllel.","Dinszteld meg a hagymát, add hozzá a felkockázott csirkét, süsd át.","Tálald a püré mellé a csirkét."]}
+,
+
+ {n:"Lencsefőzelék szalonnával",srv:"2-3 főre",diff:"Könnyű",time:"10 perc előkészítés · 35 perc főzés",tip:"A lencsét nem kell áztatni, de a főzővizet az első forrás után cseréld le, így emészthetőbb.",keep:"4 napig áll el hűtőben, másnapra sűrűsödik, vízzel hígítható.",
+  i:["lencse","hagyma","fokhagyma","szalonna","liszt","étolaj"],q:{lencse:"200 g",hagyma:"1 közepes",fokhagyma:"2 gerezd",szalonna:"50 g",liszt:"2 evőkanál",étolaj:"2 evőkanál"},qKg:{lencse:0.2,hagyma:0.12,fokhagyma:0.01,szalonna:0.05,liszt:0.02,étolaj:0.02},
+  s:["Tedd fel főni a lencsét bő vízben, 25-30 perc alatt puhára főzzük.","Közben a kockázott szalonnát süsd ki, add hozzá az apróra vágott hagymát és fokhagymát.","Szórd rá a lisztet, kavard barnára, majd öntsd fel egy merőkanál főzővízzel.","Keverd a lencséhez, főzd még 5 percig, sózd, ízlés szerint ecettel savanyítsd."]},
+ {n:"Párolt káposzta kolbásszal",srv:"2-3 főre",diff:"Könnyű",time:"10 perc előkészítés · 30 perc főzés",tip:"Egy kevés kristálycukorral karamellizáld a hagymát, ettől lesz mélyebb az íze.",keep:"3-4 napig áll el, másnapra még finomabb.",
+  i:["káposzta","kolbász","hagyma","étolaj"],q:{káposzta:"500 g",kolbász:"150 g",hagyma:"1 közepes",étolaj:"2 evőkanál"},qKg:{káposzta:0.5,kolbász:0.15,hagyma:0.12,étolaj:0.02},
+  s:["Szeleteld vékonyra a káposztát, vágd karikára a kolbászt.","Dinszteld üvegesre a hagymát az olajon, add hozzá a kolbászt.","Add hozzá a káposztát, sózd, fedő alatt párold 25 percig, időnként kavard meg.","Ha kell, önts alá kevés vizet."]},
+ {n:"Bolognai spagetti",srv:"3 főre",diff:"Közepes",time:"15 perc előkészítés · 40 perc főzés",tip:"Minél tovább főzöd a húsmártást kis lángon, annál finomabb lesz.",keep:"4 napig a hűtőben, a szósz le is fagyasztható.",
+  i:["tészta","darált marha","paradicsom","hagyma","fokhagyma","sárgarépa"],q:{tészta:"250 g",["darált marha"]:"250 g",paradicsom:"400 g",hagyma:"1 közepes",fokhagyma:"2 gerezd",sárgarépa:"1 közepes"},qKg:{tészta:0.25,"darált marha":0.25,paradicsom:0.4,hagyma:0.12,fokhagyma:0.01,sárgarépa:0.1},
+  s:["Vágd apróra a hagymát, fokhagymát, reszeld le a sárgarépát.","Pirítsd meg a darált húst, add hozzá a zöldségeket, majd az összevágott paradicsomot.","Főzd kis lángon legalább 30 percig, sózd, borsozd.","Főzd meg a tésztát, tálald a szósszal."]},
+ {n:"Lecsó kolbásszal",srv:"2-3 főre",diff:"Könnyű",time:"10 perc előkészítés · 25 perc főzés",tip:"A kolbászt külön süsd ki, így a zsírjában még jobb lesz a lecsó alapja.",keep:"4 napig áll el, kenyérrel vagy rizzsel tálald.",
+  i:["paprika","paradicsom","hagyma","kolbász","étolaj"],q:{paprika:"400 g",paradicsom:"400 g",hagyma:"1 nagy",kolbász:"150 g",étolaj:"1 evőkanál"},qKg:{paprika:0.4,paradicsom:0.4,hagyma:0.15,kolbász:0.15,étolaj:0.01},
+  s:["Karikázd fel a hagymát és a kolbászt, szeleteld fel a paprikát, kockázd a paradicsomot.","Süsd ki a kolbászt, tedd félre, a zsírban dinszteld üvegesre a hagymát.","Add hozzá a paprikát, majd a paradicsomot, fedő alatt főzd 15 percig.","Keverd vissza a kolbászt, sózd, ízlés szerint paprikázd."]},
+ {n:"Palacsinta",srv:"3-4 főre",diff:"Közepes",time:"10 perc előkészítés · 20 perc sütés",tip:"A tésztát hagyd állni 15 percig, így nem lesz csomós és könnyebb kisütni.",keep:"2 napig áll el hűtőben, serpenyőben felmelegíthető.",
+  i:["liszt","tej","tojás","étolaj"],q:{liszt:"150 g",tej:"3 dl",tojás:"2 db",étolaj:"2 evőkanál"},qKg:{liszt:0.15,tej:0.3,tojás:0.12,étolaj:0.02},
+  s:["Keverd simára a lisztet, a tejet és a tojásokat egy csipet sóval.","Hagyd pihenni 15 percig.","Egy kevés olajon sütő serpenyőben süsd mindkét oldalát aranybarnára, vékonyan kiöntve.","Töltsd ízlés szerint (lekvár, túró, kakaó)."]},
+ {n:"Rántott csirkemell",srv:"2-3 főre",diff:"Közepes",time:"15 perc előkészítés · 15 perc sütés",tip:"Az olaj akkor jó, ha egy morzsa azonnal felszínre úszik és sistereg.",keep:"2 napig áll el, sütőben visszaropogósítható.",
+  i:["csirkemell","liszt","tojás","kenyér","étolaj"],q:{csirkemell:"400 g",liszt:"50 g",tojás:"2 db",kenyér:"60 g (száraz kenyérből morzsa)",étolaj:"2 dl"},qKg:{csirkemell:0.4,liszt:0.05,tojás:0.12,kenyér:0.06,étolaj:0.1},
+  s:["Szeleteld vékony szeletekre a csirkemellet, sózd.","Forgasd meg lisztben, felvert tojásban, majd kenyérmorzsában.","Süsd forró olajban mindkét oldalát aranybarnára.","Papírtörlőn csöpögtesd le."]},
+ {n:"Zöldséges tésztaleves",srv:"3-4 főre",diff:"Nagyon könnyű",time:"10 perc előkészítés · 25 perc főzés",tip:"A tésztát külön főzd meg, ha másnapra is el akarod tenni, így nem puhul szét.",keep:"3 napig áll el, a tésztát külön tárold.",
+  i:["sárgarépa","burgonya","hagyma","zöldborsó","tészta"],q:{sárgarépa:"200 g",burgonya:"300 g",hagyma:"1 kicsi",zöldborsó:"100 g",tészta:"80 g"},qKg:{sárgarépa:0.2,burgonya:0.3,hagyma:0.08,zöldborsó:0.1,tészta:0.08},
+  s:["Kockázd fel a zöldségeket.","Tedd fel főni 1,5 l vízben, sózd.","20 perc után add hozzá a borsót és a tésztát.","Főzd még 8-10 percig, ízlés szerint petrezselyemmel szórd meg."]},
+ {n:"Rizibizi (rizs zöldborsóval)",srv:"2 főre",diff:"Nagyon könnyű",time:"5 perc előkészítés · 20 perc főzés",tip:"A vajat a végén keverd bele, hogy ne égjen meg és szép fényes legyen.",keep:"2 napig áll el, kevés vízzel melegítsd újra.",
+  i:["rizs","zöldborsó","vaj"],q:{rizs:"200 g",zöldborsó:"300 g",vaj:"30 g"},qKg:{rizs:0.2,zöldborsó:0.3,vaj:0.03},
+  s:["Főzd meg a rizst a szokásos módon.","Közben főzd puhára a zöldborsót sós vízben.","Keverd össze, add hozzá a vajat, kóstold meg, sózd."]},
+ {n:"Joghurtos csirkés tál",srv:"2 főre",diff:"Könnyű",time:"10 perc előkészítés · 15 perc sütés",tip:"A joghurtot a tálaláskor tedd rá, hogy hűvös maradjon.",keep:"Legjobb frissen, a joghurtos rész külön 1 napig áll el.",
+  i:["csirkemell","uborka","joghurt","fokhagyma","kenyér"],q:{csirkemell:"300 g",uborka:"300 g",joghurt:"150 g",fokhagyma:"1 gerezd",kenyér:"100 g"},qKg:{csirkemell:0.3,uborka:0.3,joghurt:0.15,fokhagyma:0.01,kenyér:0.1},
+  s:["Csíkozd fel és süsd meg sóval, borssal a csirkét.","Keverd el a joghurtot a zúzott fokhagymával, sózd.","Szeleteld fel az uborkát, tálald a csirkével és a kenyérrel.","Locsold meg a fokhagymás joghurttal."]},
+ {n:"Túrós csusza",srv:"2-3 főre",diff:"Könnyű",time:"5 perc előkészítés · 15 perc főzés",tip:"A szalonnát kis lángon süsd, hogy kiolvadjon a zsírja és ropogós maradjon.",keep:"Frissen a legjobb, 1 napig áll el.",
+  i:["tészta","túró","tejföl","szalonna"],q:{tészta:"200 g",túró:"250 g",tejföl:"100 g",szalonna:"60 g"},qKg:{tészta:0.2,túró:0.25,tejföl:0.1,szalonna:0.06},
+  s:["Főzd meg a tésztát, szűrd le.","Kockázd fel a szalonnát és süsd ropogósra.","Forgasd a tésztát a szalonnás zsírban, tálald túróval és tejföllel."]},
+ {n:"Zöldséges rántotta",srv:"1-2 főre",diff:"Nagyon könnyű",time:"5 perc előkészítés · 10 perc főzés",tip:"Kis lángon, folyamatosan kavarva lesz krémes a rántotta.",keep:"Frissen a legjobb.",
+  i:["tojás","paprika","paradicsom","hagyma","étolaj"],q:{tojás:"3 db",paprika:"150 g",paradicsom:"1 közepes",hagyma:"fél közepes",étolaj:"1 evőkanál"},qKg:{tojás:0.18,paprika:0.15,paradicsom:0.12,hagyma:0.06,étolaj:0.01},
+  s:["Aprítsd fel a zöldségeket.","Dinszteld a hagymát a paprikával az olajon, adj hozzá paradicsomot.","Ütd rá a tojásokat, sózd, kevergetve süsd készre."]},
+ {n:"Tejberizs",srv:"2-3 főre",diff:"Könnyű",time:"5 perc előkészítés · 30 perc főzés",tip:"Ízlés szerint ízesítheted fahéjjal, kakaóporral vagy lekvárral.",keep:"2 napig áll el hűtőben, tejjel hígítható.",
+  i:["rizs","tej"],q:{rizs:"150 g",tej:"6 dl"},qKg:{rizs:0.15,tej:0.6},
+  s:["Forrald fel a tejet.","Add hozzá a rizst, kis lángon főzd 25-30 percig, gyakran kavargatva.","Ízesítsd cukorral, fahéjjal vagy ahogy szereted."]},
+ {n:"Fokhagymás-tejfölös sült burgonya",srv:"2-3 főre",diff:"Könnyű",time:"10 perc előkészítés · 35 perc sütés",tip:"A burgonyát hagyd sütés előtt egy percig a forró tepsiben, így jobban megpirul.",keep:"2 napig áll el, a tejfölt külön tárold.",
+  i:["burgonya","fokhagyma","tejföl","étolaj"],q:{burgonya:"500 g",fokhagyma:"1 gerezd",tejföl:"150 g",étolaj:"3 evőkanál"},qKg:{burgonya:0.5,fokhagyma:0.01,tejföl:0.15,étolaj:0.03},
+  s:["Szeleteld vagy cikkezd a burgonyát, forgasd meg olajjal, sóval.","Süsd 220°C-on 30-35 percig, félidőben fordítsd meg.","Keverd a tejfölt a zúzott fokhagymával, tálald mellé."]},
+ {n:"Sajtos-kukoricás melegszendvics",srv:"2 főre",diff:"Nagyon könnyű",time:"5 perc előkészítés · 8 perc sütés",tip:"A kenyér külső oldalát kend vajjal, így szép aranyszínű lesz.",keep:"Frissen a legjobb.",
+  i:["kenyér","sajt","kukorica","vaj"],q:{kenyér:"150 g",sajt:"80 g",kukorica:"80 g",vaj:"20 g"},qKg:{kenyér:0.15,sajt:0.08,kukorica:0.08,vaj:0.02},
+  s:["Keverd össze a reszelt sajtot a kukoricával.","Kend meg vajjal a kenyér külső oldalát, tedd közé a töltelékét.","Süsd serpenyőben mindkét oldalát aranyra."]},
+ {n:"Rizses hús",srv:"3 főre",diff:"Közepes",time:"10 perc előkészítés · 30 perc főzés",tip:"A rizst ne kavard túl sokat, különben kásás lesz.",keep:"3 napig áll el, kevés vízzel melegíthető.",
+  i:["rizs","darált sertés","hagyma","paradicsom","fokhagyma","sárgarépa"],q:{rizs:"200 g",["darált sertés"]:"250 g",hagyma:"1 közepes",paradicsom:"200 g",fokhagyma:"1 gerezd",sárgarépa:"1 közepes"},qKg:{rizs:0.2,"darált sertés":0.25,hagyma:0.12,paradicsom:0.2,fokhagyma:0.01,sárgarépa:0.1},
+  s:["Pirítsd meg a darált húst, add hozzá az apróra vágott hagymát, fokhagymát.","Add hozzá a reszelt sárgarépát és a paradicsomot.","Szórd bele a rizst, önts rá annyi vizet, hogy ellepje, sózd.","Fedő alatt főzd 20 percig, amíg a rizs megpuhul."]},
+ {n:"Brokkolis tészta",srv:"2 főre",diff:"Könnyű",time:"5 perc előkészítés · 15 perc főzés",tip:"A brokkolit a tészta főzővizében is megfőzheted, kevesebb edényt használsz.",keep:"2 napig áll el, frissen a legjobb.",
+  i:["tészta","brokkoli","fokhagyma","vaj","sajt"],q:{tészta:"200 g",brokkoli:"300 g",fokhagyma:"2 gerezd",vaj:"30 g",sajt:"40 g"},qKg:{tészta:0.2,brokkoli:0.3,fokhagyma:0.01,vaj:0.03,sajt:0.04},
+  s:["Főzd meg a tésztát, a végén a brokkolit is dobd a vízbe 4 percre.","Olvaszd meg a vajat, pirítsd meg benne a fokhagymát.","Forgasd össze mindent, szórd meg reszelt sajttal."]},
+ {n:"Nokedli tejfölösen, szalonnával",srv:"2-3 főre",diff:"Közepes",time:"10 perc előkészítés · 15 perc főzés",tip:"A tésztának olyan sűrűnek kell lennie, hogy lassan folyjon le a kanálról.",keep:"2 napig áll el, kevés vízzel melegítsd újra.",
+  i:["liszt","tojás","tejföl","szalonna"],q:{liszt:"200 g",tojás:"2 db",tejföl:"100 g",szalonna:"50 g"},qKg:{liszt:0.2,tojás:0.12,tejföl:0.1,szalonna:0.05},
+  s:["Keverd csomómentesre a lisztet a tojással, sóval és kevés vízzel.","Szaggasd a tésztát forrásban lévő sós vízbe, amíg feljön a felszínre, főzd még 2 percig.","Közben süsd ki a kockázott szalonnát.","Forgasd össze a leszűrt nokedlit a szalonnával, tálald a tejföllel."]},
+ {n:"Krumplileves kolbásszal",srv:"3 főre",diff:"Könnyű",time:"10 perc előkészítés · 25 perc főzés",tip:"A kolbászt előbb pirítsd meg, így a leves színe és íze is jobb lesz.",keep:"3 napig áll el, másnapra még sűrűbb.",
+  i:["burgonya","kolbász","hagyma","sárgarépa","fokhagyma","étolaj"],q:{burgonya:"400 g",kolbász:"100 g",hagyma:"1 kicsi",sárgarépa:"1 közepes",fokhagyma:"1 gerezd",étolaj:"2 evőkanál"},qKg:{burgonya:0.4,kolbász:0.1,hagyma:0.1,sárgarépa:0.1,fokhagyma:0.01,étolaj:0.02},
+  s:["Dinszteld a hagymát és a fokhagymát az olajon, add hozzá a karikázott kolbászt.","Add hozzá a kockázott krumplit és sárgarépát, önts rá 1 liter vizet.","Sózd, főzd 20 percig, amíg a krumpli megpuhul."]},
+ {n:"Rakott tészta darált hússal",srv:"3-4 főre",diff:"Közepes",time:"15 perc előkészítés · 25 perc sütés",tip:"A tésztát félig főzd meg, a sütőben úgyis megpuhul tovább.",keep:"3-4 napig áll el, sütőben jól melegíthető.",
+  i:["tészta","darált sertés","paradicsom","sajt","hagyma"],q:{tészta:"250 g",["darált sertés"]:"250 g",paradicsom:"300 g",sajt:"80 g",hagyma:"1 közepes"},qKg:{tészta:0.25,"darált sertés":0.25,paradicsom:0.3,sajt:0.08,hagyma:0.1},
+  s:["Főzd félig puhára a tésztát.","Pirítsd meg a hagymát és a darált húst, add hozzá a paradicsomot, főzd 10 percig.","Keverd össze a tésztával, tedd tepsibe, szórd meg reszelt sajttal.","Süsd 200°C-on 20-25 percig."]},
+ {n:"Rántott sajt",srv:"2 főre",diff:"Közepes",time:"10 perc előkészítés · 10 perc sütés",tip:"A panírozott sajtot tedd 15 percre a hűtőbe, így nem folyik ki sütéskor.",keep:"Frissen a legjobb.",
+  i:["sajt","liszt","tojás","kenyér","étolaj"],q:{sajt:"200 g",liszt:"40 g",tojás:"2 db",kenyér:"60 g (száraz kenyérből morzsa)",étolaj:"2 dl"},qKg:{sajt:0.2,liszt:0.04,tojás:0.12,kenyér:0.06,étolaj:0.1},
+  s:["Szeleteld fel a sajtot, forgasd meg lisztben, tojásban, morzsában, még egyszer tojásban és morzsában.","Hűtsd 15 percig.","Süsd forró olajban mindkét oldalát aranybarnára."]},
+ {n:"Sárgarépafőzelék tojással",srv:"2-3 főre",diff:"Könnyű",time:"10 perc előkészítés · 20 perc főzés",tip:"A rántást ne hagyd megégni, csak világos aranyszínig pirítsd.",keep:"3 napig áll el hűtőben.",
+  i:["sárgarépa","liszt","tejföl","hagyma","tojás","étolaj"],q:{sárgarépa:"500 g",liszt:"20 g",tejföl:"100 g",hagyma:"fél közepes",tojás:"2 db",étolaj:"2 evőkanál"},qKg:{sárgarépa:0.5,liszt:0.02,tejföl:0.1,hagyma:0.06,tojás:0.12,étolaj:0.02},
+  s:["Reszeld le a sárgarépát, főzd puhára kevés vízben.","Készíts rántást a liszttel és az olajjal, add hozzá a hagymát.","Keverd a répához, főzd 5 percig, a végén keverd bele a tejfölt.","Tálald főtt tojással."]},
+ {n:"Káposztás tészta",srv:"2-3 főre",diff:"Könnyű",time:"10 perc előkészítés · 25 perc főzés",tip:"A káposztát addig süsd, amíg enyhén megbarnul, így lesz édes az íze.",keep:"3 napig áll el, melegítéskor kevés víz kell hozzá.",
+  i:["tészta","káposzta","hagyma","étolaj"],q:{tészta:"200 g",káposzta:"400 g",hagyma:"1 közepes",étolaj:"3 evőkanál"},qKg:{tészta:0.2,káposzta:0.4,hagyma:0.1,étolaj:0.03},
+  s:["Szeleteld a káposztát és a hagymát.","Süsd az olajon 15-20 percig, amíg megpuhul és kicsit megbarnul.","Főzd meg a tésztát, keverd a káposztához, sózd, borsozd."]},
+ {n:"Csirkés zöldségleves",srv:"3-4 főre",diff:"Könnyű",time:"10 perc előkészítés · 30 perc főzés",tip:"A csirkét egészben főzd, utána aprítsd fel, így szaftosabb marad.",keep:"3-4 napig áll el, a tésztát külön tárold.",
+  i:["csirkemell","sárgarépa","burgonya","hagyma","tészta"],q:{csirkemell:"300 g",sárgarépa:"2 közepes",burgonya:"300 g",hagyma:"1 közepes",tészta:"60 g"},qKg:{csirkemell:0.3,sárgarépa:0.2,burgonya:0.3,hagyma:0.1,tészta:0.06},
+  s:["Tedd fel főni a csirkét 1,5 liter vízben, sózd.","Add hozzá a zöldségeket, főzd 20 percig.","Szedd ki a csirkét, aprítsd fel, tedd vissza.","Add hozzá a tésztát, főzd még 8 percig."]},
+ {n:"Tojásos-sajtos pirítós",srv:"1-2 főre",diff:"Nagyon könnyű",time:"5 perc előkészítés · 8 perc sütés",tip:"A kenyér lehet kicsit száraz is, a tojásos keverékben úgyis megpuhul.",keep:"Frissen a legjobb.",
+  i:["kenyér","tojás","sajt","fokhagyma","vaj"],q:{kenyér:"200 g",tojás:"2 db",sajt:"80 g",fokhagyma:"1 gerezd",vaj:"20 g"},qKg:{kenyér:0.2,tojás:0.12,sajt:0.08,fokhagyma:0.01,vaj:0.02},
+  s:["Verd fel a tojásokat a reszelt sajttal és a zúzott fokhagymával.","Mártsd bele a kenyérszeleteket.","Süsd vajon mindkét oldalát aranybarnára."]}
+];
+
+const $ = id => document.getElementById(id);
+const fmt = n => Math.round(n).toLocaleString("hu-HU");
+let lastPrices = null;
+
+function log(msg, isErr){
+  console.log(msg);
+  const box = $("logbox");
+  if(!box) return;
+  const line = document.createElement("div");
+  if(isErr) line.className = "err";
+  line.textContent = (new Date()).toLocaleTimeString("hu-HU") + " — " + msg;
+  box.appendChild(line);
+  box.scrollTop = box.scrollHeight;
+}
+
+async function loadOne(id){
+  const r = await fetch(API + id);
+  if(!r.ok) throw new Error(r.status);
+  const d = await r.json();
+  let best = null;
+  for(const p of d.products || []){
+    const sale = (p.pricesOfChainStores||[]).some(c => (c.prices||[]).some(x => x.type && x.type !== "NORMAL"));
+    if(p.minUnitPrice > 0 && (!best || p.minUnitPrice < best.p)){
+      best = {p:p.minUnitPrice, chain:(p.pricesOfChainStores[0]||{}).name || "", sale};
+    }
+  }
+  if(!best) throw new Error("no data");
+  return best;
+}
+
+const GH_DATA_URL = "https://raw.githubusercontent.com/gergokovacstavaszi-spec/ma-olcso-adat/main/prices.json";
+
+async function init(){
+  const dot = $("dot"), st = $("statusText");
+  dot.classList.remove("live");
+  st.textContent = "Árak betöltése…";
+  log("Frissítés indítva…");
+
+  // 1) napi, automatikusan frissített adat a GitHub repóból
+  try {
+    log("Próbálkozás: GitHub (" + GH_DATA_URL + ")");
+    const r = await fetch(GH_DATA_URL + "?t=" + Date.now());
+    if(r.ok){
+      const json = await r.json();
+      const data = json.ingredients || json;
+      dot.classList.add("live");
+      st.textContent = "Napi friss árak (automatikusan frissítve)";
+      if(json.meta && json.meta.updated){
+        $("updatedLine").textContent = "Utoljára frissítve: " + new Date(json.meta.updated).toLocaleString("hu-HU");
+      } else { $("updatedLine").textContent = ""; }
+      log("GitHub adat betöltve, " + Object.keys(data).length + " alapanyag.");
+      render(data);
+      return;
+    }
+    log("GitHub válasz nem OK (" + r.status + ")", true);
+  } catch(e){ log("GitHub lekérés sikertelen: " + e, true); }
+
+  // 2) kézzel beillesztett adat, ha korábban azt használtad
+  const saved = localStorage.getItem("maOlcsoPrices");
+  if(saved){
+    try {
+      render(JSON.parse(saved)); st.textContent = "Beillesztett friss adatok"; dot.classList.add("live");
+      log("Korábban beillesztett adat betöltve a böngésző tárolójából.");
+      return;
+    } catch(e){ log("Beillesztett adat olvasása sikertelen: " + e, true); }
+  }
+
+  // 3) közvetlen böngészős lekérés (CORS miatt gyakran nem fog menni)
+  log("Közvetlen Árfigyelő-lekérés megkísérlése (gyakran CORS miatt nem megy)…");
+  const prices = {}; let live = 0;
+  await Promise.all(Object.entries(CATS).map(async ([name,id]) => {
+    try { prices[name] = await loadOne(id); live++; }
+    catch(e){ prices[name] = {...SAMPLE[name], sample:true}; log(name + ": sikertelen, minta ár", true); }
+  }));
+  const total = Object.keys(CATS).length;
+  if(live === total){ dot.classList.add("live"); st.textContent = "Élő árak az Árfigyelőtől"; }
+  else if(live > 0){ dot.classList.add("live"); st.textContent = `Élő ár ${live}/${total} alapanyagnál, a többi minta`; }
+  else { st.textContent = "Minta adatok — a napi frissítés még nem érhető el"; }
+  render(prices);
+}
+
+function render(prices){
+  prices = {...prices};
+  Object.keys(CATS).forEach(k=>{ if(!prices[k] || !prices[k].p) prices[k] = {...SAMPLE[k], chain:"becsült", sample:true}; });
+  lastPrices = prices;
+  let ref = {};
+  try{
+    const today=new Date().toISOString().slice(0,10);
+    let st=JSON.parse(localStorage.getItem("maOlcsoPrev")||"null")||{day:today,prices:{},ref:{}};
+    const cur={}; Object.entries(prices).forEach(([k,v])=>{ if(!v.sample) cur[k]=v.p; });
+    if(st.day!==today){ st={day:today,ref:st.prices||{},prices:cur}; } else { st.prices=cur; }
+    localStorage.setItem("maOlcsoPrev",JSON.stringify(st)); ref=st.ref||{};
+  }catch(e){}
+  const arrow=(k,v)=>{ const o=ref[k]; if(!o||v.sample) return ""; const d=(v.p-o)/o; return d>0.01?`<span class="up" title="Drágább, mint legutóbb">▲</span>`:d<-0.01?`<span class="down" title="Olcsóbb, mint legutóbb">▼</span>`:""; };
+  $("chips").innerHTML = Object.entries(prices).map(([n,v]) =>
+    `<div class="chip">${n} <b>${fmt(v.p)}</b>${arrow(n,v)}${v.chain?` · ${v.chain}`:""}${v.sale?" ★":""}</div>`).join("");
+  applyFilter();
+  renderCart();
+}
+
+const LS = {
+  get(k,d){ try{ const v=localStorage.getItem(k); return v?JSON.parse(v):d; }catch(e){ return d; } },
+  set(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} }
+};
+let pantry = LS.get("maOlcsoPantry",[]), favs = LS.get("maOlcsoFavs",[]), mult = LS.get("maOlcsoMult",1), favOnly = false;
+const openCards = new Set();
+const DIFF = {"Nagyon könnyű":0,"Könnyű":1,"Közepes":2};
+
+function scaleQ(str,m){
+  if(m===1) return str;
+  let num, rest;
+  if(/^fél\s/.test(str)){ num=0.5; rest=str.replace(/^fél\s+/,""); }
+  else { const mt=str.match(/^(\d+(?:[.,]\d+)?)\s*(.*)$/); if(!mt) return str; num=parseFloat(mt[1].replace(",","."))*1; rest=mt[2]; }
+  num*=m;
+  if(rest==="g" && num>=1000){ return (num/1000).toFixed(2).replace(/\.?0+$/,"").replace(".",",")+" kg"; }
+  const n = Number.isInteger(num) ? String(num) : num.toFixed(1).replace(".",",");
+  return n+" "+rest;
+}
+const MEAT = ["csirkemell","kolbász","darált sertés","darált marha","szalonna"];
+const isVeg = r => !r.i.some(k=>MEAT.includes(k));
+function perPerson(r,cost){ const m=r.srv.match(/(\d+)(?:-(\d+))?/); const n=m?(m[2]?(+m[1]+ +m[2])/2:+m[1]):2; return cost/(n*mult); }
+function costOf(r){ return r.i.filter(k=>!pantry.includes(k)).reduce((s,k)=>s+lastPrices[k].p*r.qKg[k]*mult,0); }
+function makePlan(){
+  if(!lastPrices) return;
+  const days=parseInt($("planDays").value,10), budget=parseFloat($("planBudget").value)||Infinity, veg=$("planVeg").checked;
+  const pool = RECIPES.filter(r=>!veg||isVeg(r)).map(r=>({r,c:costOf(r)})).sort((a,b)=>a.c-b.c);
+  const picked=[], used={}; let sum=0;
+  for(const p of pool){
+    if(picked.length>=days) break;
+    const key=p.r.i[0]; if((used[key]||0)>=2) continue;
+    if(sum+p.c>budget) continue;
+    picked.push(p); used[key]=(used[key]||0)+1; sum+=p.c;
+  }
+  const box=$("planRes");
+  if(!picked.length){ box.innerHTML='<div class="hint">Ebből a keretből nem jön ki recept — próbálj nagyobb keretet vagy kevesebb napot.</div>'; return; }
+  window._plan = picked.map(p=>p.r.n);
+  box.innerHTML = picked.map((p,i)=>`<div class="item"><span>${i+1}. nap — ${p.r.n}</span><span>${fmt(p.c)} Ft</span></div>`).join("")
+    + `<div class="sum"><span>Összesen</span><span>${fmt(sum)} Ft</span></div>`
+    + (picked.length<days?`<div class="hint">A keretbe csak ${picked.length} recept fért bele.</div>`:"")
+    + `<button class="go" style="margin-top:10px" onclick="planToCart()">Mind a bevásárlólistához</button>`;
+}
+function planToCart(){ (window._plan||[]).forEach(n=>{ if(!cart.includes(n)) cart.push(n); }); saveCart(); renderCart(); toast("✓ A heti terv a bevásárlólistán"); $("cartbox").scrollIntoView({behavior:"smooth"}); }
+function surprise(){
+  const steps=[...document.querySelectorAll(".steps")]; if(!steps.length){ toast("Nincs megjeleníthető recept"); return; }
+  const el=steps[Math.floor(Math.random()*steps.length)];
+  el.classList.add("open"); openCards.add(el.id.replace("steps-",""));
+  el.parentElement.scrollIntoView({behavior:"smooth",block:"center"});
+}
+function shareRecipe(name){
+  const r=RECIPES.find(x=>x.n===name); if(!r) return;
+  const txt=r.n+" ("+r.srv+")\n\nHozzávalók:\n"+r.i.map(k=>"- "+k+": "+scaleQ(r.q[k],mult)).join("\n")+"\n\nElkészítés:\n"+r.s.map((x,i)=>(i+1)+". "+x).join("\n")+"\n\n(Ma Olcsó — receptek a hozzávalók napi ára alapján)";
+  const copy=()=>{ try{ navigator.clipboard.writeText(txt).then(()=>toast("✓ Recept a vágólapra másolva"),()=>prompt("Másold ki:",txt)); }catch(e){ prompt("Másold ki:",txt); } };
+  if(navigator.share){ navigator.share({title:r.n,text:txt}).catch(()=>{}); } else copy();
+}
+function togglePantry(k){ pantry = pantry.includes(k)? pantry.filter(x=>x!==k) : [...pantry,k]; LS.set("maOlcsoPantry",pantry); renderPantry(); applyFilter(); renderCart(); }
+function renderPantry(){
+  $("pantry").innerHTML = Object.keys(CATS).map(k=>`<button class="${pantry.includes(k)?"have":""}" onclick="togglePantry('${k}')">${pantry.includes(k)?"✓ ":""}${k}</button>`).join("");
+  $("pantryCount").textContent = pantry.length ? "("+pantry.length+" kiválasztva)" : "";
+}
+function setOpt(){ mult = parseInt($("multSel").value,10)||1; LS.set("maOlcsoMult",mult); applyFilter(); renderCart(); }
+function toggleFavOnly(){ favOnly=!favOnly; $("favOnly").classList.toggle("on",favOnly); applyFilter(); }
+function toggleFav(name){ favs = favs.includes(name)? favs.filter(x=>x!==name) : [...favs,name]; LS.set("maOlcsoFavs",favs); applyFilter(); }
+
+function applyFilter(){
+  if(!lastPrices) return;
+  const q = ($("search") ? $("search").value : "").trim().toLowerCase();
+  const diff = $("diffSel").value, sort = $("sortSel").value;
+  let rows = RECIPES
+    .map(r => ({...r,
+      cost:r.i.filter(k=>!pantry.includes(k)).reduce((s,k)=>s+lastPrices[k].p*r.qKg[k]*mult,0),
+      home:r.i.filter(k=>pantry.includes(k)).length,
+      saleN:r.i.filter(k=>lastPrices[k].sale).length}))
+    .filter(r => !q || r.n.toLowerCase().includes(q) || r.i.some(k=>k.toLowerCase().includes(q)))
+    .filter(r => !diff || r.diff===diff)
+    .filter(r => !favOnly || favs.includes(r.n))
+    .filter(r => $("dietSel").value!=="veg" || isVeg(r))
+    .filter(r => { const mx=parseFloat($("maxCost").value); return !(mx>0) || r.cost<=mx; });
+  rows.sort((a,b)=> sort==="easy" ? (DIFF[a.diff]-DIFF[b.diff])||(a.cost-b.cost) : sort==="few" ? (a.i.length-b.i.length)||(a.cost-b.cost) : a.cost-b.cost);
+  const cheapest = RECIPES.map(r=>({r,c:costOf(r)})).sort((a,b)=>a.c-b.c)[0];
+  const t=$("today"); if(t){ t.style.display="block"; t.innerHTML=`🔥 <b>Ma a legolcsóbb:</b> ${cheapest.r.n} — kb. ${fmt(cheapest.c)} Ft (${fmt(perPerson(cheapest.r,cheapest.c))} Ft/fő)`; }
+  $("listTitle").textContent = sort==="cost" ? "Receptek, a legolcsóbbtól" : sort==="easy" ? "Receptek, a legkönnyebbtől" : "Receptek, a legkevesebb hozzávalóval";
+  if(!rows.length){ $("list").innerHTML = '<div class="empty">Nincs a szűrésnek megfelelő recept.</div>'; return; }
+  $("list").innerHTML = rows.map((r,idx) => { const key=encodeURIComponent(r.n); const nameAttr=JSON.stringify(r.n).replace(/"/g,"&quot;"); return `
+   <div class="card" onclick="toggle('${key}')"><div class="card-top"><div>
+     <div class="name">${r.n}${isVeg(r)?'<span class="badge">hús nélkül</span>':""} <button class="fav" title="Kedvenc" onclick="event.stopPropagation();toggleFav(${nameAttr})">${favs.includes(r.n)?"♥":"♡"}</button></div>
+     <div class="ings">${r.i.map(k=>`<span class="ing ${lastPrices[k].sale?"sale":""} ${pantry.includes(k)?"have":""}">${k} ${fmt(lastPrices[k].p)}</span>`).join("")}</div>
+   </div><div class="score"><div class="big">${fmt(r.cost)} Ft</div><div class="lbl">≈ ${fmt(perPerson(r,r.cost))} Ft/fő · ${mult>1?"×"+mult+" adag · ":""}a recepthez kell${r.home?` · ${r.home} otthon van`:""}${r.saleN?` · ${r.saleN} akciós`:""}</div></div></div>
+   <div class="steps ${openCards.has(key)?"open":""}" id="steps-${key}">
+     <div class="meta"><span><b>${mult>1?mult+"× ":""}${r.srv}</b></span><span>${r.time}</span><span>${r.diff}</span></div>
+     <ul class="qty">${r.i.map(k=>`<li><span>${k}${pantry.includes(k)?" (otthon van)":""}</span><span>${scaleQ(r.q[k],mult)}</span></li>`).join("")}</ul>
+     <ol>${r.s.map(step=>`<li>${step}</li>`).join("")}</ol>
+     <div class="note"><b>Tipp:</b> ${r.tip}</div>
+     <div class="note"><b>Maradék:</b> ${r.keep}</div>
+     <button class="addbtn" onclick="event.stopPropagation();addToCart(${nameAttr})">+ Bevásárlólistához</button><button class="sharebtn" onclick="event.stopPropagation();shareRecipe(${nameAttr})">Megosztás</button>
+   </div></div>`; }).join("");
+}
+
+function toggle(key){ const el=document.getElementById("steps-"+key); el.classList.toggle("open"); if(el.classList.contains("open")) openCards.add(key); else openCards.delete(key); }
+
+let cart = [];
+try{ cart = JSON.parse(localStorage.getItem("maOlcsoCart")||"[]"); }catch(e){ cart=[]; }
+let toastT;
+function toast(msg){ const t=$("toast"); if(!t) return; t.textContent=msg; t.classList.add("show"); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove("show"),2200); }
+function saveCart(){ try{ localStorage.setItem("maOlcsoCart", JSON.stringify(cart)); }catch(e){} }
+function addToCart(name){
+  if(!cart.includes(name)) cart.push(name);
+  saveCart(); renderCart(); toast("✓ Hozzáadva a bevásárlólistához");
+  const b = document.activeElement;
+  if(b && b.classList && b.classList.contains("addbtn")){ b.textContent="✓ Hozzáadva a listához"; b.classList.add("done"); }
+}
+function removeFromCart(name){ cart = cart.filter(x=>x!==name); saveCart(); renderCart(); }
+function copyCart(){
+  const recs = RECIPES.filter(r=>cart.includes(r.n)); const tot={};
+  recs.forEach(r=>r.i.forEach(k=>{ if(!pantry.includes(k)) tot[k]=(tot[k]||0)+r.qKg[k]*mult; }));
+  const txt = "Bevásárlólista (Ma Olcsó)\n" + Object.entries(tot).map(([k,kg])=>"- "+k+": "+(kg>=1?kg.toFixed(2).replace(".",",")+" kg":Math.round(kg*1000)+" g")).join("\n");
+  const done=()=>{ const b=document.querySelector(".copybtn"); if(b) b.textContent="✓ Másolva"; toast("✓ Bevásárlólista a vágólapra másolva"); };
+  try{ navigator.clipboard.writeText(txt).then(done,()=>prompt("Másold ki:",txt)); }catch(e){ prompt("Másold ki:",txt); }
+}
+function clearCart(){ cart=[]; saveCart(); renderCart(); }
+function renderCart(){
+  const box=$("cartbox"); if(!box) return;
+  const recs = RECIPES.filter(r=>cart.includes(r.n));
+  const fab = $("fab");
+  if(!recs.length || !lastPrices){ box.style.display="none"; fab.style.display="none"; return; }
+  fab.style.display="block"; fab.textContent = "🛒 Lista (" + recs.length + ")";
+  const tot = {};
+  recs.forEach(r=>r.i.forEach(k=>{ if(!pantry.includes(k)) tot[k]=(tot[k]||0)+r.qKg[k]*mult; }));
+  let sum=0;
+  const rows = Object.entries(tot).map(([k,kg])=>{ const c=lastPrices[k].p*kg; sum+=c;
+    return `<div class="cartrow"><span>${k} — ${kg>=1?kg.toFixed(2).replace(".",",")+" kg":Math.round(kg*1000)+" g"}</span><span>${fmt(c)} Ft</span></div>`; }).join("");
+  const rl = recs.map(r=>`<div class="cartrec"><span>${r.n}</span><button onclick="removeFromCart(${JSON.stringify(r.n).replace(/"/g,'&quot;')})">törlés</button></div>`).join("");
+  $("cartContent").innerHTML = rl + rows + `<div class="carttotal"><span>Becsült összesen</span><span>${fmt(sum)} Ft</span></div>
+  <div class="cartnote">A boltban egész csomagokat veszel, így a valós kassza-összeg magasabb lehet. <button class="cartclear" onclick="clearCart()">Lista ürítése</button></div><button class="copybtn" onclick="copyCart()">📋 Lista másolása</button>`;
+  box.style.display="block";
+}
+
+
+function loadPasted(){
+  try {
+    const data = JSON.parse($("pasteArea").value);
+    localStorage.setItem("maOlcsoPrices", JSON.stringify(data));
+    render(data);
+    $("dot").classList.add("live");
+    $("statusText").textContent = "Beillesztett friss adatok";
+    $("pasteMsg").textContent = "Betöltve.";
+  } catch(e){ $("pasteMsg").textContent = "Ez nem érvényes JSON — ellenőrizd a szkript kimenetét."; }
+}
+
+$("multSel").value=String(mult);
+renderPantry();
+init();
+</script>
+</body>
+</html>
